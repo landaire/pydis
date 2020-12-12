@@ -11,19 +11,22 @@ pub struct Instruction {
 #[allow(non_camel_case_types)]
 #[repr(u8)]
 pub enum Opcode {
+    STOP_CODE = 0,
     POP_TOP = 1,
     ROT_TWO = 2,
     ROT_THREE = 3,
     DUP_TOP = 4,
     DUP_TOP_TWO = 5,
     ROT_FOUR = 6,
+
     NOP = 9,
     UNARY_POSITIVE = 10,
     UNARY_NEGATIVE = 11,
     UNARY_NOT = 12,
+    UNARY_CONVERT = 13,
+
     UNARY_INVERT = 15,
-    BINARY_MATRIX_MULTIPLY = 16,
-    INPLACE_MATRIX_MULTIPLY = 17,
+
     BINARY_POWER = 19,
     BINARY_MULTIPLY = 20,
     BINARY_MODULO = 22,
@@ -34,12 +37,22 @@ pub enum Opcode {
     BINARY_TRUE_DIVIDE = 27,
     INPLACE_FLOOR_DIVIDE = 28,
     INPLACE_TRUE_DIVIDE = 29,
-    RERAISE = 48,
-    WITH_EXCEPT_START = 49,
-    GET_AITER = 50,
-    GET_ANEXT = 51,
-    BEFORE_ASYNC_WITH = 52,
-    END_ASYNC_FOR = 54,
+    SLICE_0 = 30,
+    SLICE_1 = 31,
+    SLICE_2 = 32,
+    SLICE_3 = 33,
+
+    STORE_SLICE_0 = 40,
+    STORE_SLICE_1 = 41,
+    STORE_SLICE_2 = 42,
+    STORE_SLICE_3 = 43,
+
+    DELETE_SLICE_0 = 50,
+    DELETE_SLICE_1 = 51,
+    DELETE_SLICE_2 = 52,
+    DELETE_SLICE_3 = 53,
+
+    STORE_MAP = 54,
     INPLACE_ADD = 55,
     INPLACE_SUBTRACT = 56,
     INPLACE_MULTIPLY = 57,
@@ -53,35 +66,39 @@ pub enum Opcode {
     BINARY_OR = 66,
     INPLACE_POWER = 67,
     GET_ITER = 68,
-    GET_YIELD_FROM_ITER = 69,
+
     PRINT_EXPR = 70,
-    LOAD_BUILD_CLASS = 71,
-    YIELD_FROM = 72,
-    GET_AWAITABLE = 73,
-    LOAD_ASSERTION_ERROR = 74,
+    PRINT_ITEM = 71,
+    PRINT_NEWLINE = 72,
+    PRINT_ITEM_TO = 73,
+    PRINT_NEWLINE_TO = 74,
     INPLACE_LSHIFT = 75,
     INPLACE_RSHIFT = 76,
     INPLACE_AND = 77,
     INPLACE_XOR = 78,
     INPLACE_OR = 79,
-    LIST_TO_TUPLE = 82,
+    BREAK_LOOP = 80,
+    WITH_CLEANUP = 81,
+    LOAD_LOCALS = 82,
     RETURN_VALUE = 83,
     IMPORT_STAR = 84,
-    SETUP_ANNOTATIONS = 85,
+    EXEC_STMT = 85,
     YIELD_VALUE = 86,
     POP_BLOCK = 87,
-    POP_EXCEPT = 89,
+    END_FINALLY = 88,
+    BUILD_CLASS = 89,
 
     // Opcodes with arguments
     STORE_NAME = 90,
     DELETE_NAME = 91,
     UNPACK_SEUQNECE = 92,
     FOR_ITER = 93,
-    UNPACK_EX = 94,
+    LIST_APPEND = 94,
     STORE_ATTR = 95,
     DELETE_ATTR = 96,
     STORE_GLOBAL = 97,
     DELETE_GLOBAL = 98,
+    DUP_TOPX = 99,
     LOAD_CONST = 100,
     LOAD_NAME = 101,
     BUILD_TUPLE = 102,
@@ -98,13 +115,16 @@ pub enum Opcode {
     POP_JUMP_IF_FALSE = 114,
     POP_JUMP_IF_TRUE = 115,
     LOAD_GLOBAL = 116,
-    IS_OP = 117,
-    CONTAINS_OP = 118,
-    JUMP_IF_NOT_EXC_MATCH = 121,
+
+    CONTINUE_LOOP = 119,
+    SETUP_LOOP = 120,
+    SETUP_EXCEPT = 121,
     SETUP_FINALLY = 122,
+
     LOAD_FAST = 124,
     STORE_FAST = 125,
     DELETE_FAST = 126,
+
     RAISE_VARARGS = 130,
     CALL_FUNCTION = 131,
     MAKE_FUNCTION = 132,
@@ -112,23 +132,15 @@ pub enum Opcode {
     LOAD_CLOSURE = 135,
     LOAD_DEREF = 136,
     STORE_DEREF = 138,
+
+    CALL_FUNCTION_VAR = 140,
     CALL_FUNCTION_KW = 141,
-    CALL_FUNCTION_EX = 142,
+    CALL_FUNCTION_VAR_KW = 142,
+
     SETUP_WITH = 143,
-    LIST_APPEND = 145,
+    EXTENDED_ARG = 145,
     SET_ADD = 146,
     MAP_ADD = 147,
-    // Python 3
-    // LOAD_CLASSDEREF = 148,
-    // SETUP_ASYNC_WITH = 154,
-    // FORMAT_VALUE = 155,
-    // BUILD_CONST_KEY_MAP = 156,
-    // BUILD_STRING = 157,
-    // LOAD_METHOD = 160,
-    // CALL_METHOD = 161,
-    // LIST_EXTEND = 162,
-    // SET_UPDATE = 163,
-    // DICT_MERGE = 164,
 }
 
 impl Opcode {
@@ -157,10 +169,11 @@ impl Opcode {
         matches!(
             self,
             Opcode::FOR_ITER
-                //| Opcode::FORWARD
+                | Opcode::JUMP_FORWARD
+                | Opcode::SETUP_LOOP
+                | Opcode::SETUP_EXCEPT
                 | Opcode::SETUP_FINALLY
                 | Opcode::SETUP_WITH
-                //| Opcode::SETUP_ASYNC_WITH
         )
     }
 
@@ -173,7 +186,7 @@ impl Opcode {
                 | Opcode::JUMP_ABSOLUTE
                 | Opcode::POP_JUMP_IF_FALSE
                 | Opcode::POP_JUMP_IF_TRUE
-                | Opcode::JUMP_IF_NOT_EXC_MATCH
+                | Opcode::CONTINUE_LOOP
         )
     }
 
@@ -191,6 +204,7 @@ impl Opcode {
                 | Opcode::LOAD_ATTR
                 | Opcode::IMPORT_NAME
                 | Opcode::IMPORT_FROM
+                | Opcode::LOAD_GLOBAL
         )
     }
 
@@ -198,7 +212,7 @@ impl Opcode {
     pub fn has_local(&self) -> bool {
         matches!(
             self,
-            Opcode::LOAD_FAST | Opcode::STORE_FAST | Opcode::DELETE_FAST //| Opcode::LOAD_METHOD
+            Opcode::LOAD_FAST | Opcode::STORE_FAST | Opcode::DELETE_FAST
         )
     }
 
@@ -206,9 +220,7 @@ impl Opcode {
     pub fn has_free(&self) -> bool {
         matches!(
             self,
-            Opcode::LOAD_CLOSURE
-                | Opcode::LOAD_DEREF
-                | Opcode::STORE_DEREF
+            Opcode::LOAD_CLOSURE | Opcode::LOAD_DEREF | Opcode::STORE_DEREF
         )
     }
 }
