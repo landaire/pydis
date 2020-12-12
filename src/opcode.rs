@@ -29,6 +29,7 @@ pub enum Opcode {
 
     BINARY_POWER = 19,
     BINARY_MULTIPLY = 20,
+    BINARY_DIVIDE = 21,
     BINARY_MODULO = 22,
     BINARY_ADD = 23,
     BINARY_SUBTRACT = 24,
@@ -102,6 +103,7 @@ pub enum Opcode {
     LOAD_CONST = 100,
     LOAD_NAME = 101,
     BUILD_TUPLE = 102,
+    BUILD_LIST = 103,
     BUILD_SET = 104,
     BUILD_MAP = 105,
     LOAD_ATTR = 106,
