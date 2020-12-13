@@ -1,16 +1,10 @@
 use enum_primitive_derive::Primitive;
 
-#[derive(Debug, Clone)]
-pub struct Instruction {
-    pub opcode: Opcode,
-    pub arg: Option<u16>,
-}
-
 /// Opcodes taken from https://github.com/python/cpython/blob/2.7/Lib/opcode.py
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Primitive)]
 #[allow(non_camel_case_types)]
 #[repr(u8)]
-pub enum Opcode {
+pub enum Python27 {
     STOP_CODE = 0,
     POP_TOP = 1,
     ROT_TWO = 2,
@@ -145,84 +139,93 @@ pub enum Opcode {
     MAP_ADD = 147,
 }
 
-impl Opcode {
+impl super::Opcode for Python27 {
     /// Whether or not this opcode has an argument
-    pub fn has_arg(&self) -> bool {
+    fn has_arg(&self) -> bool {
         *self as u8 >= 90
     }
 
     /// Whether or not this opcode has an extended argument
-    pub fn has_extended_arg(&self) -> bool {
+    fn has_extended_arg(&self) -> bool {
         *self as u8 >= 144
     }
 
     /// Whether or not this opcode has a constant parameter
-    pub fn has_const(&self) -> bool {
-        *self == Opcode::LOAD_CONST
+    fn has_const(&self) -> bool {
+        *self == Self::LOAD_CONST
     }
 
     /// Whether or not this opcode is a boolean operation
-    pub fn has_comp(&self) -> bool {
-        matches!(self, Opcode::COMPARE_OP)
+    fn has_comp(&self) -> bool {
+        matches!(self, Self::COMPARE_OP)
     }
 
     /// Whether or not this opcode has a relative jump target
-    pub fn is_relative_jump(&self) -> bool {
+    fn is_relative_jump(&self) -> bool {
         matches!(
             self,
-            Opcode::FOR_ITER
-                | Opcode::JUMP_FORWARD
-                | Opcode::SETUP_LOOP
-                | Opcode::SETUP_EXCEPT
-                | Opcode::SETUP_FINALLY
-                | Opcode::SETUP_WITH
+            Self::FOR_ITER
+                | Self::JUMP_FORWARD
+                | Self::SETUP_LOOP
+                | Self::SETUP_EXCEPT
+                | Self::SETUP_FINALLY
+                | Self::SETUP_WITH
         )
     }
 
     /// Whether or not this opcode has an absolute jump target
-    pub fn is_absolute_jump(&self) -> bool {
+    fn is_absolute_jump(&self) -> bool {
         matches!(
             self,
-            Opcode::JUMP_IF_FALSE_OR_POP
-                | Opcode::JUMP_IF_TRUE_OR_POP
-                | Opcode::JUMP_ABSOLUTE
-                | Opcode::POP_JUMP_IF_FALSE
-                | Opcode::POP_JUMP_IF_TRUE
-                | Opcode::CONTINUE_LOOP
+            Self::JUMP_IF_FALSE_OR_POP
+                | Self::JUMP_IF_TRUE_OR_POP
+                | Self::JUMP_ABSOLUTE
+                | Self::POP_JUMP_IF_FALSE
+                | Self::POP_JUMP_IF_TRUE
+                | Self::CONTINUE_LOOP
+        )
+    }
+
+    /// Whether or not this opcode is a conditional jump
+    fn is_conditional_jump(&self) -> bool {
+        matches!(
+            self,
+            Self::JUMP_IF_FALSE_OR_POP
+                | Self::JUMP_IF_TRUE_OR_POP
+                | Self::JUMP_ABSOLUTE
+                | Self::POP_JUMP_IF_FALSE
+                | Self::POP_JUMP_IF_TRUE
         )
     }
 
     /// Whether or not this opcode accesses an attribute by name
-    pub fn has_name(&self) -> bool {
+    fn has_name(&self) -> bool {
         matches!(
             self,
-            Opcode::STORE_NAME
-                | Opcode::DELETE_NAME
-                | Opcode::STORE_ATTR
-                | Opcode::DELETE_ATTR
-                | Opcode::STORE_GLOBAL
-                | Opcode::DELETE_GLOBAL
-                | Opcode::LOAD_NAME
-                | Opcode::LOAD_ATTR
-                | Opcode::IMPORT_NAME
-                | Opcode::IMPORT_FROM
-                | Opcode::LOAD_GLOBAL
+            Self::STORE_NAME
+                | Self::DELETE_NAME
+                | Self::STORE_ATTR
+                | Self::DELETE_ATTR
+                | Self::STORE_GLOBAL
+                | Self::DELETE_GLOBAL
+                | Self::LOAD_NAME
+                | Self::LOAD_ATTR
+                | Self::IMPORT_NAME
+                | Self::IMPORT_FROM
+                | Self::LOAD_GLOBAL
         )
     }
 
     /// Whether or not this opcode accesses a local variable
-    pub fn has_local(&self) -> bool {
-        matches!(
-            self,
-            Opcode::LOAD_FAST | Opcode::STORE_FAST | Opcode::DELETE_FAST
-        )
+    fn has_local(&self) -> bool {
+        matches!(self, Self::LOAD_FAST | Self::STORE_FAST | Self::DELETE_FAST)
     }
 
     /// Whether or not this opcode accesses a free variable
-    pub fn has_free(&self) -> bool {
+    fn has_free(&self) -> bool {
         matches!(
             self,
-            Opcode::LOAD_CLOSURE | Opcode::LOAD_DEREF | Opcode::STORE_DEREF
+            Self::LOAD_CLOSURE | Self::LOAD_DEREF | Self::STORE_DEREF
         )
     }
 }

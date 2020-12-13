@@ -6,8 +6,6 @@ pub enum DecodeError {
     UnknownOpcode(u8),
     #[error("an IO error occurred while reading data: {0}")]
     IoError(#[from] std::io::Error),
-    #[error("reached EOF unexpectedly while parsing {0:?}")]
-    UnexpectedEof(crate::opcode::Opcode),
     #[error("could not read required number of bytes")]
     InvalidBytesRead,
 }
