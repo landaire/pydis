@@ -1,7 +1,7 @@
 [package]
 name = "pydis"
 description = "Python 2.7 bytecode disassembler"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Lander Brandt <landerbrandt@gmail.com>"]
 edition = "2018"
 license = "MIT"

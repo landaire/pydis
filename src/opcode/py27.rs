@@ -192,7 +192,6 @@ impl super::Opcode for Python27 {
             self,
             Self::JUMP_IF_FALSE_OR_POP
                 | Self::JUMP_IF_TRUE_OR_POP
-                | Self::JUMP_ABSOLUTE
                 | Self::POP_JUMP_IF_FALSE
                 | Self::POP_JUMP_IF_TRUE
         )
