@@ -14,20 +14,14 @@ pub fn decode<O: Opcode + FromPrimitive, R: Read>(
     source: &mut R,
 ) -> Result<Instruction<O>, DecodeError> {
     let mut opcode_buffer = [0u8];
-    let bytes_read = source.read(&mut opcode_buffer)?;
-    if bytes_read != opcode_buffer.len() {
-        return Err(error::DecodeError::InvalidBytesRead);
-    }
+    source.read_exact(&mut opcode_buffer)?;
 
     let opcode = O::from_u8(opcode_buffer[0])
         .map_or(Err(DecodeError::UnknownOpcode(opcode_buffer[0])), Ok)?;
 
     let arg = if opcode.has_arg() {
         let mut argument_buffer = [0u8, 0u8];
-        let bytes_read = source.read(&mut argument_buffer)?;
-        if bytes_read != argument_buffer.len() {
-            return Err(error::DecodeError::InvalidBytesRead);
-        }
+        source.read_exact(&mut argument_buffer)?;
 
         Some(u16::from_le_bytes(argument_buffer))
     } else {

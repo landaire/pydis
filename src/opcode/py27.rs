@@ -86,7 +86,7 @@ pub enum Python27 {
     // Opcodes with arguments
     STORE_NAME = 90,
     DELETE_NAME = 91,
-    UNPACK_SEUQNECE = 92,
+    UNPACK_SEQUENCE = 92,
     FOR_ITER = 93,
     LIST_APPEND = 94,
     STORE_ATTR = 95,
