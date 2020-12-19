@@ -35,6 +35,11 @@ pub trait Opcode {
     /// Whether or not this opcode is a boolean operation
     fn has_comp(&self) -> bool;
 
+    /// Whether or not this opcode is any kind of instruction which may jump
+    fn is_jump(&self) -> bool {
+        self.is_relative_jump() || self.is_absolute_jump()
+    }
+
     /// Whether or not this opcode has a relative jump target
     fn is_relative_jump(&self) -> bool;
 
