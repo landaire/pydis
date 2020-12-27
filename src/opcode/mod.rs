@@ -1,3 +1,5 @@
+use std::fmt::{self, Debug};
+
 mod py27;
 
 pub use py27::*;
@@ -8,10 +10,10 @@ pub struct Instruction<O: Opcode> {
     pub arg: Option<u16>,
 }
 
-use std::fmt::{self, Debug};
 impl<O: Opcode + Debug> fmt::Display for Instruction<O> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.opcode)?;
+
         if let Some(arg) = self.arg {
             write!(f, " {}", arg)?;
         }
