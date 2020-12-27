@@ -209,6 +209,8 @@ pub trait Opcode {
         self.is_relative_jump() || self.is_absolute_jump()
     }
 
+    fn is_other_conditional_jump(&self) -> bool;
+
     /// Whether or not this opcode has a relative jump target
     fn is_relative_jump(&self) -> bool;
 

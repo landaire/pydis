@@ -186,6 +186,19 @@ impl super::Opcode for Python27 {
         )
     }
 
+    /// Whether or not this opcode is another type of "special" jumping instruction
+    /// e.g. FOR_ITER, SETUP_LOOP, etc.
+    fn is_other_conditional_jump(&self) -> bool {
+        matches!(
+            self,
+            Self::FOR_ITER
+                | Self::SETUP_LOOP
+                | Self::SETUP_EXCEPT
+                | Self::SETUP_FINALLY
+                | Self::SETUP_WITH
+        )
+    }
+
     /// Whether or not this opcode is a conditional jump
     fn is_conditional_jump(&self) -> bool {
         matches!(
