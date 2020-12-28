@@ -4,7 +4,7 @@ mod py27;
 
 pub use py27::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Instruction<O: Opcode> {
     pub opcode: O,
     pub arg: Option<u16>,
