@@ -10,6 +10,22 @@ pub struct Instruction<O: Opcode> {
     pub arg: Option<u16>,
 }
 
+#[macro_export]
+macro_rules! Instr {
+    ($opcode:expr) => {
+        ::pydis::opcode::Instruction {
+            opcode: $opcode,
+            arg: None,
+        }
+    };
+    ($opcode:expr, $arg:expr) => {
+        ::pydis::opcode::Instruction {
+            opcode: $opcode,
+            arg: Some($arg),
+        }
+    };
+}
+
 impl<O: Opcode + Debug> fmt::Display for Instruction<O> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.opcode)?;
