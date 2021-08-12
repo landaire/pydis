@@ -3,7 +3,7 @@ pub mod opcode;
 pub mod prelude;
 
 use num_traits::FromPrimitive;
-use opcode::Python27;
+use opcode::py27::{Mnemonic, Standard};
 use std::io::Read;
 
 use crate::error::DecodeError;
@@ -32,6 +32,6 @@ pub fn decode<O: Opcode + FromPrimitive, R: Read>(
 }
 
 /// Convenience wrapper around [`decode`] for decoding Python 2.7 instructions
-pub fn decode_py27(source: &mut impl Read) -> Result<Instruction<Python27>, DecodeError> {
-    decode::<Python27, _>(source)
+pub fn decode_py27<O: Opcode<Mnemonic = crate::opcode::py27::Mnemonic>, R: Read>(source: &mut R) -> Result<Instruction<O>, DecodeError> {
+    decode::<O, _>(source)
 }

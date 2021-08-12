@@ -1,8 +1,11 @@
 use std::fmt::{self, Debug};
 
-mod py27;
+pub use num_traits::FromPrimitive;
+pub use num_traits::ToPrimitive;
 
-pub use py27::*;
+use self::py27::Mnemonic;
+
+pub mod py27;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Instruction<O: Opcode> {
@@ -50,152 +53,151 @@ impl<O: Opcode> Instruction<O> {
     }
 }
 
-impl Instruction<Python27> {
+impl<O: Opcode<Mnemonic = py27::Mnemonic>> Instruction<O> {
     /// How the stack adjusts after this instruction executes. A positive number indicates that N
     /// elements were pushed to the stack while a negative number indicates the number of elements
     /// removed from the stack
     pub fn stack_adjustment_after(&self) -> isize {
-        type TargetOpcode = Python27;
-        match self.opcode {
+        match self.opcode.mnemonic() {
             // Meta instructions
-            TargetOpcode::STOP_CODE
-            | TargetOpcode::NOP
-            | TargetOpcode::ROT_TWO
-            | TargetOpcode::ROT_THREE
-            | TargetOpcode::ROT_FOUR => 0,
+            Mnemonic::STOP_CODE
+            | Mnemonic::NOP
+            | Mnemonic::ROT_TWO
+            | Mnemonic::ROT_THREE
+            | Mnemonic::ROT_FOUR => 0,
 
-            TargetOpcode::POP_TOP => -1,
-            TargetOpcode::DUP_TOP => 1,
-            TargetOpcode::DUP_TOP_TWO => 2,
+            Mnemonic::POP_TOP => -1,
+            Mnemonic::DUP_TOP => 1,
+            Mnemonic::DUP_TOP_TWO => 2,
             // Unary ops
-            TargetOpcode::UNARY_POSITIVE
-            | TargetOpcode::UNARY_NEGATIVE
-            | TargetOpcode::UNARY_NOT
-            | TargetOpcode::UNARY_CONVERT
-            | TargetOpcode::UNARY_INVERT
-            | TargetOpcode::GET_ITER => 0,
+            Mnemonic::UNARY_POSITIVE
+            | Mnemonic::UNARY_NEGATIVE
+            | Mnemonic::UNARY_NOT
+            | Mnemonic::UNARY_CONVERT
+            | Mnemonic::UNARY_INVERT
+            | Mnemonic::GET_ITER => 0,
             // Binary ops
-            TargetOpcode::BINARY_POWER
-            | TargetOpcode::BINARY_MULTIPLY
-            | TargetOpcode::BINARY_DIVIDE
-            | TargetOpcode::BINARY_FLOOR_DIVIDE
-            | TargetOpcode::BINARY_TRUE_DIVIDE
-            | TargetOpcode::BINARY_MODULO
-            | TargetOpcode::BINARY_ADD
-            | TargetOpcode::BINARY_SUBTRACT
-            | TargetOpcode::BINARY_SUBSC
-            | TargetOpcode::BINARY_LSHIFT
-            | TargetOpcode::BINARY_RSHIFT
-            | TargetOpcode::BINARY_AND
-            | TargetOpcode::BINARY_XOR
-            | TargetOpcode::BINARY_OR => -1,
+            Mnemonic::BINARY_POWER
+            | Mnemonic::BINARY_MULTIPLY
+            | Mnemonic::BINARY_DIVIDE
+            | Mnemonic::BINARY_FLOOR_DIVIDE
+            | Mnemonic::BINARY_TRUE_DIVIDE
+            | Mnemonic::BINARY_MODULO
+            | Mnemonic::BINARY_ADD
+            | Mnemonic::BINARY_SUBTRACT
+            | Mnemonic::BINARY_SUBSC
+            | Mnemonic::BINARY_LSHIFT
+            | Mnemonic::BINARY_RSHIFT
+            | Mnemonic::BINARY_AND
+            | Mnemonic::BINARY_XOR
+            | Mnemonic::BINARY_OR => -1,
             // In-place operations
-            TargetOpcode::INPLACE_POWER
-            | TargetOpcode::INPLACE_MULTIPLY
-            | TargetOpcode::INPLACE_DIVIDE
-            | TargetOpcode::INPLACE_FLOOR_DIVIDE
-            | TargetOpcode::INPLACE_TRUE_DIVIDE
-            | TargetOpcode::INPLACE_MODULO
-            | TargetOpcode::INPLACE_ADD
-            | TargetOpcode::INPLACE_SUBTRACT
-            | TargetOpcode::INPLACE_LSHIFT
-            | TargetOpcode::INPLACE_RSHIFT
-            | TargetOpcode::INPLACE_AND
-            | TargetOpcode::INPLACE_XOR
-            | TargetOpcode::INPLACE_OR => -1,
+            Mnemonic::INPLACE_POWER
+            | Mnemonic::INPLACE_MULTIPLY
+            | Mnemonic::INPLACE_DIVIDE
+            | Mnemonic::INPLACE_FLOOR_DIVIDE
+            | Mnemonic::INPLACE_TRUE_DIVIDE
+            | Mnemonic::INPLACE_MODULO
+            | Mnemonic::INPLACE_ADD
+            | Mnemonic::INPLACE_SUBTRACT
+            | Mnemonic::INPLACE_LSHIFT
+            | Mnemonic::INPLACE_RSHIFT
+            | Mnemonic::INPLACE_AND
+            | Mnemonic::INPLACE_XOR
+            | Mnemonic::INPLACE_OR => -1,
             // Slice operations
-            TargetOpcode::SLICE_0 => 0,
-            TargetOpcode::SLICE_1 => -1,
-            TargetOpcode::SLICE_2 => -2,
-            TargetOpcode::SLICE_3 => -3,
-            TargetOpcode::STORE_SLICE_0 => -1,
-            TargetOpcode::STORE_SLICE_1 => -2,
-            TargetOpcode::STORE_SLICE_2 => -3,
-            TargetOpcode::STORE_SLICE_3 => -4,
-            TargetOpcode::DELETE_SLICE_0 => -1,
-            TargetOpcode::DELETE_SLICE_1 => -2,
-            TargetOpcode::DELETE_SLICE_2 => -3,
-            TargetOpcode::DELETE_SLICE_3 => -4,
-            TargetOpcode::STORE_SUBSCR => -3,
-            TargetOpcode::DELETE_SUBSCR => -2,
+            Mnemonic::SLICE_0 => 0,
+            Mnemonic::SLICE_1 => -1,
+            Mnemonic::SLICE_2 => -2,
+            Mnemonic::SLICE_3 => -3,
+            Mnemonic::STORE_SLICE_0 => -1,
+            Mnemonic::STORE_SLICE_1 => -2,
+            Mnemonic::STORE_SLICE_2 => -3,
+            Mnemonic::STORE_SLICE_3 => -4,
+            Mnemonic::DELETE_SLICE_0 => -1,
+            Mnemonic::DELETE_SLICE_1 => -2,
+            Mnemonic::DELETE_SLICE_2 => -3,
+            Mnemonic::DELETE_SLICE_3 => -4,
+            Mnemonic::STORE_SUBSCR => -3,
+            Mnemonic::DELETE_SUBSCR => -2,
             // Misc
-            TargetOpcode::PRINT_EXPR => -1,
-            TargetOpcode::PRINT_ITEM => -1,
-            TargetOpcode::PRINT_ITEM_TO => -2,
-            TargetOpcode::PRINT_NEWLINE => 0,
-            TargetOpcode::PRINT_NEWLINE_TO => -1,
-            TargetOpcode::BREAK_LOOP => 0,
-            TargetOpcode::CONTINUE_LOOP => 0,
-            TargetOpcode::LIST_APPEND => -1,
-            TargetOpcode::LOAD_LOCALS => 1,
-            TargetOpcode::RETURN_VALUE => 0,
-            TargetOpcode::YIELD_VALUE => 0,
-            TargetOpcode::IMPORT_STAR => -1,
-            TargetOpcode::EXEC_STMT => -3,
-            TargetOpcode::POP_BLOCK => 0,
-            TargetOpcode::END_FINALLY => 0,
-            TargetOpcode::BUILD_CLASS => -3,
+            Mnemonic::PRINT_EXPR => -1,
+            Mnemonic::PRINT_ITEM => -1,
+            Mnemonic::PRINT_ITEM_TO => -2,
+            Mnemonic::PRINT_NEWLINE => 0,
+            Mnemonic::PRINT_NEWLINE_TO => -1,
+            Mnemonic::BREAK_LOOP => 0,
+            Mnemonic::CONTINUE_LOOP => 0,
+            Mnemonic::LIST_APPEND => -1,
+            Mnemonic::LOAD_LOCALS => 1,
+            Mnemonic::RETURN_VALUE => 0,
+            Mnemonic::YIELD_VALUE => 0,
+            Mnemonic::IMPORT_STAR => -1,
+            Mnemonic::EXEC_STMT => -3,
+            Mnemonic::POP_BLOCK => 0,
+            Mnemonic::END_FINALLY => 0,
+            Mnemonic::BUILD_CLASS => -3,
             // TODO: maybe not right?
-            TargetOpcode::SETUP_WITH => 1,
-            TargetOpcode::WITH_CLEANUP => {
+            Mnemonic::SETUP_WITH => 1,
+            Mnemonic::WITH_CLEANUP => {
                 panic!("with_cleanup may require runtime info");
             }
-            TargetOpcode::STORE_NAME => -1,
-            TargetOpcode::STORE_FAST => -1,
-            TargetOpcode::STORE_DEREF => -1,
-            TargetOpcode::SET_ADD => -1,
-            TargetOpcode::MAP_ADD => -1,
-            TargetOpcode::DELETE_NAME => 0,
-            TargetOpcode::UNPACK_SEQUENCE => (self.arg.unwrap() as isize) - 1,
-            TargetOpcode::DUP_TOPX => self.arg.unwrap() as isize,
-            TargetOpcode::STORE_ATTR => -2,
-            TargetOpcode::DELETE_ATTR => -1,
-            TargetOpcode::STORE_GLOBAL => -1,
-            TargetOpcode::DELETE_GLOBAL => 0,
-            TargetOpcode::LOAD_CONST => 1,
-            TargetOpcode::LOAD_NAME => 1,
-            TargetOpcode::BUILD_TUPLE | TargetOpcode::BUILD_LIST | TargetOpcode::BUILD_SET => {
+            Mnemonic::STORE_NAME => -1,
+            Mnemonic::STORE_FAST => -1,
+            Mnemonic::STORE_DEREF => -1,
+            Mnemonic::SET_ADD => -1,
+            Mnemonic::MAP_ADD => -1,
+            Mnemonic::DELETE_NAME => 0,
+            Mnemonic::UNPACK_SEQUENCE => (self.arg.unwrap() as isize) - 1,
+            Mnemonic::DUP_TOPX => self.arg.unwrap() as isize,
+            Mnemonic::STORE_ATTR => -2,
+            Mnemonic::DELETE_ATTR => -1,
+            Mnemonic::STORE_GLOBAL => -1,
+            Mnemonic::DELETE_GLOBAL => 0,
+            Mnemonic::LOAD_CONST => 1,
+            Mnemonic::LOAD_NAME => 1,
+            Mnemonic::BUILD_TUPLE | Mnemonic::BUILD_LIST | Mnemonic::BUILD_SET => {
                 (self.arg.unwrap() as isize) - 1
             }
-            TargetOpcode::BUILD_MAP => 1,
-            TargetOpcode::LOAD_ATTR => 0,
-            TargetOpcode::COMPARE_OP => -1,
-            TargetOpcode::IMPORT_NAME => -1,
-            TargetOpcode::IMPORT_FROM => 1,
-            TargetOpcode::JUMP_FORWARD | TargetOpcode::JUMP_ABSOLUTE => 0,
-            TargetOpcode::POP_JUMP_IF_FALSE | TargetOpcode::POP_JUMP_IF_TRUE => -1,
-            TargetOpcode::JUMP_IF_FALSE_OR_POP | TargetOpcode::JUMP_IF_TRUE_OR_POP => {
+            Mnemonic::BUILD_MAP => 1,
+            Mnemonic::LOAD_ATTR => 0,
+            Mnemonic::COMPARE_OP => -1,
+            Mnemonic::IMPORT_NAME => -1,
+            Mnemonic::IMPORT_FROM => 1,
+            Mnemonic::JUMP_FORWARD | Mnemonic::JUMP_ABSOLUTE => 0,
+            Mnemonic::POP_JUMP_IF_FALSE | Mnemonic::POP_JUMP_IF_TRUE => -1,
+            Mnemonic::JUMP_IF_FALSE_OR_POP | Mnemonic::JUMP_IF_TRUE_OR_POP => {
                 panic!("JUMP_IF_*_OR_POP requires runtime info");
             }
-            TargetOpcode::FOR_ITER => 1,
-            TargetOpcode::LOAD_GLOBAL => 1,
-            TargetOpcode::SETUP_LOOP => 0,
-            TargetOpcode::SETUP_EXCEPT | TargetOpcode::SETUP_FINALLY => {
+            Mnemonic::FOR_ITER => 1,
+            Mnemonic::LOAD_GLOBAL => 1,
+            Mnemonic::SETUP_LOOP => 0,
+            Mnemonic::SETUP_EXCEPT | Mnemonic::SETUP_FINALLY => {
                 panic!("SETUP_EXCEPT requires runtime info");
             }
-            TargetOpcode::STORE_MAP => -2,
-            TargetOpcode::LOAD_FAST => 1,
-            TargetOpcode::DELETE_FAST => 0,
-            TargetOpcode::LOAD_CLOSURE => 0,
-            TargetOpcode::LOAD_DEREF => 1,
-            TargetOpcode::RAISE_VARARGS => 0,
-            TargetOpcode::CALL_FUNCTION => {
+            Mnemonic::STORE_MAP => -2,
+            Mnemonic::LOAD_FAST => 1,
+            Mnemonic::DELETE_FAST => 0,
+            Mnemonic::LOAD_CLOSURE => 0,
+            Mnemonic::LOAD_DEREF => 1,
+            Mnemonic::RAISE_VARARGS => 0,
+            Mnemonic::CALL_FUNCTION => {
                 let pos_args = self.arg.unwrap() & 0xFF;
                 let kwargs = (self.arg.unwrap() >> 8) & 0xFF;
                 // 1 arg is removed for the callable, 1 is added for the return value
                 -(pos_args as isize + kwargs as isize + 1) + 1
             }
-            TargetOpcode::MAKE_FUNCTION => -1,
-            TargetOpcode::MAKE_CLOSURE => 2 + self.arg.unwrap() as isize,
-            TargetOpcode::BUILD_SLICE => 1 - (self.arg.unwrap() as isize),
-            TargetOpcode::EXTENDED_ARG => panic!("not supported yet"),
-            TargetOpcode::CALL_FUNCTION_VAR | TargetOpcode::CALL_FUNCTION_KW => {
+            Mnemonic::MAKE_FUNCTION => -1,
+            Mnemonic::MAKE_CLOSURE => 2 + self.arg.unwrap() as isize,
+            Mnemonic::BUILD_SLICE => 1 - (self.arg.unwrap() as isize),
+            Mnemonic::EXTENDED_ARG => panic!("not supported yet"),
+            Mnemonic::CALL_FUNCTION_VAR | Mnemonic::CALL_FUNCTION_KW => {
                 let pos_args = self.arg.unwrap() & 0xFF;
                 let kwargs = (self.arg.unwrap() >> 8) & 0xFF;
                 // 1 arg is removed for the callable and additional positional args, 1 is added for the return value
                 -(pos_args as isize + kwargs as isize + 2) + 1
             }
-            TargetOpcode::CALL_FUNCTION_VAR_KW => {
+            Mnemonic::CALL_FUNCTION_VAR_KW => {
                 let pos_args = self.arg.unwrap() & 0xFF;
                 let kwargs = (self.arg.unwrap() >> 8) & 0xFF;
                 // 1 arg is removed for the callable and additional positional+kw args, 1 is added for the return value
@@ -207,7 +209,9 @@ impl Instruction<Python27> {
 
 /// Trait that provides convenience routines for opcode properties such as whether
 /// or not it has an argument, is a jump, etc.
-pub trait Opcode {
+pub trait Opcode: From<Self::Mnemonic> + Send + Sync + FromPrimitive + ToPrimitive + Copy + Clone + Debug {
+    type Mnemonic;
+
     /// Whether or not this opcode has an argument
     fn has_arg(&self) -> bool;
 
@@ -244,4 +248,6 @@ pub trait Opcode {
 
     /// Whether or not this opcode accesses a free variable
     fn has_free(&self) -> bool;
+
+    fn mnemonic(&self) -> Self::Mnemonic;
 }
